@@ -51,6 +51,8 @@ var (
 
 	output = flag.String("o", "", "")
 
+	sourceIP = flag.String("b", "", "")
+
 	c = flag.Int("c", 50, "")
 	n = flag.Int("n", 200, "")
 	q = flag.Float64("q", 0, "")
@@ -92,6 +94,7 @@ Options:
   -a  Basic authentication, username:password.
   -x  HTTP Proxy address as host:port.
   -h2 Enable HTTP/2.
+  -b  Bind the source ip.
 
   -host	HTTP Host header.
 
@@ -234,6 +237,7 @@ func main() {
 		H2:                 *h2,
 		ProxyAddr:          proxyURL,
 		Output:             *output,
+		SourceIP:           *sourceIP,
 	}
 	w.Init()
 

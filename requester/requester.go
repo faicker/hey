@@ -20,6 +20,7 @@ import (
 	"crypto/tls"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/http/httptrace"
 	"net/url"
@@ -56,6 +57,9 @@ type Work struct {
 	// RequestFunc is a function to generate requests. If it is nil, then
 	// Request and RequestData are cloned for each request.
 	RequestFunc func() *http.Request
+
+	// SourceIP is the source ip to bind
+	SourceIP string
 
 	// N is the total number of requests to make.
 	N int
@@ -235,6 +239,9 @@ func (b *Work) runWorkers() {
 	var wg sync.WaitGroup
 	wg.Add(b.C)
 
+	localTCPAddr := net.TCPAddr{
+		IP: net.ParseIP(b.SourceIP),
+	}
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true,
@@ -244,6 +251,9 @@ func (b *Work) runWorkers() {
 		DisableCompression:  b.DisableCompression,
 		DisableKeepAlives:   b.DisableKeepAlives,
 		Proxy:               http.ProxyURL(b.ProxyAddr),
+		DialContext: (&net.Dialer{
+			LocalAddr: &localTCPAddr,
+		}).DialContext,
 	}
 	if b.H2 {
 		http2.ConfigureTransport(tr)
